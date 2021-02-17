@@ -24,14 +24,18 @@ public class Server implements Runnable {
     public void run() {
         while(true) {
             Service service = null;
+            try {
+                switch(port) {
+                    case 4000:
+                        service = new ProgService(sSocket.accept());
+                        break;
+                    default:
+                        service = new AmaService(sSocket.accept());
+                }
+            }catch(IOException e) {
 
-            switch(port) {
-                case 4000:
-                    service = new ProgService();
-                    break;
-                default:
-                    service = new AmaService();
             }
+
             new Thread(service).start();
         }
     }
