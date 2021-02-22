@@ -3,7 +3,7 @@ package server.bri.services;
 
 import server.bri.NetworkData;
 import server.bri.Service;
-import server.bri.ServiceRegistry;
+import server.bri.managers.ServiceManager;
 
 import java.net.Socket;
 
@@ -17,14 +17,14 @@ public class AmaService implements Service {
     @Override
     public void run() {
         try {
-            Class.forName("server.bri.ServiceRegistry");
-            String services = ServiceRegistry.serviceListing();
+            Class.forName("server.bri.managers.ServiceManager");
+            String services = ServiceManager.serviceListing();
             net.send(services);
             net.send("Choose one of them, please ?");
 
             int serviceToLaunch = Integer.parseInt(net.read().toString());
 
-            Class<?> serviceClass = ServiceRegistry.getService(serviceToLaunch);
+            Class<?> serviceClass = ServiceManager.getService(serviceToLaunch);
 
             // instanciate
         } catch (ClassNotFoundException e) {

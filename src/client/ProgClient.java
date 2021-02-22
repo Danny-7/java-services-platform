@@ -1,8 +1,8 @@
 package client;
 
+import server.bri.NetworkData;
+
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -14,19 +14,18 @@ public class ProgClient {
     public static void main(String[] args) {
         try {
             socket = new Socket(HOST, PORT);
-            ObjectInputStream socketIn = new ObjectInputStream(socket.getInputStream());
-            ObjectOutputStream socketOut = new ObjectOutputStream(socket.getOutputStream());
+            NetworkData net = new NetworkData(socket);
             Scanner sc = new Scanner(System.in);
 
-            System.out.format("You are connected on port %d at %s", PORT, HOST);
+            System.out.format("You are connected on port %d at %s\n", PORT, HOST);
 
             while(true) {
-                String message = (String) socketIn.readObject();
+                String message = (String) net.read();
                 System.out.println(message);
+                String answer = sc.nextLine();
+                net.send(answer);
             }
-
-
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
