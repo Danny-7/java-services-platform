@@ -43,6 +43,7 @@ public class ProgService implements Service {
         }while(notConform);
 
         // list all features available
+        boolean stop = false;
 
         String messageToSend = """
                 Welcome to the BRI manager for incredible programmers !
@@ -53,41 +54,51 @@ public class ProgService implements Service {
                 \t- Update a service [4]
                 \t- Uninstall a service [5]""";
 
-        net.send(messageToSend);
+        do {
+            net.send(messageToSend);
+            String choice = net.read().toString();
 
-        int choice = (int) net.read();
+            if(choice.equals("stop")) {
+                stop = true;
+                break;
+            }
 
-        switch(choice) {
-            case 1:
-                installService();
-                break;
-            case 2:
-                startService();
-                break;
-            case 3:
-                stopService();
-            case 4:
-                update();
-                break;
-            case 5:
-                uninstall();
-                break;
-            default:
-                net.send("This choice doesn't exist");
-        }
+            int choiceInteger = Integer.parseInt(choice);
+
+            switch(choiceInteger) {
+                case 1:
+                    installService();
+                    break;
+                case 2:
+                    startService();
+                    break;
+                case 3:
+                    stopService();
+                case 4:
+                    update();
+                    break;
+                case 5:
+                    uninstall();
+                    break;
+                default:
+                    net.send("This choice doesn't exist");
+            }
+        }while(!stop);
+
 
     }
 
     public void installService() {
         try {
             ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
+            System.out.println(serviceLoader);
 
             net.send("Please enter the path ?");
             String path = (String) net.read();
 
             Class<?> classLoaded = serviceLoader.loadClass(path);
             BRIManager.installService(classLoaded);
-            net.send("Service "+ classLoaded.getSimpleName() + " added");
+//            net.send("Service "+ classLoaded.getSimpleName() + " added");
         } catch (Exception e) {
             net.send(e.getMessage());
         }

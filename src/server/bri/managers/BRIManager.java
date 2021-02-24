@@ -3,14 +3,15 @@ package server.bri.managers;
 import server.model.Developer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 public class BRIManager {
     private static final UserManager userManager;
 
-    private static final Vector<Class<?>> startedClasses;
-    private static final Vector<Class<?>> stoppedClasses;
+    private static final List<Class<?>> startedClasses;
+    private static final List<Class<?>> stoppedClasses;
     private static final Map<Developer, Vector<Class<?>>> classesDictionnary;
 
     static {
@@ -37,8 +38,6 @@ public class BRIManager {
     }
 
     public static void installService(Class<?> bean) throws Exception {
-        if(!isAuthorizedToPerformAction(bean))
-            return;
         ServiceManager.addService(bean);
         addToDictionary(bean);
     }

@@ -3,6 +3,7 @@ package server.bri.loaders;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 
 public class ServiceLoader{
     private final URLClassLoader urlClassLoader;
@@ -13,5 +14,10 @@ public class ServiceLoader{
 
     public Class<?> loadClass(String classPath) throws ClassNotFoundException {
         return urlClassLoader.loadClass(classPath);
+    }
+
+    @Override
+    public String toString() {
+        return "ftp url -> " + Arrays.toString(urlClassLoader.getURLs());
     }
 }
