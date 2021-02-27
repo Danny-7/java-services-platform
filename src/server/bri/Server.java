@@ -27,11 +27,12 @@ public class Server implements Runnable {
             try {
                 if (port == 4000) {
                     service = new ProgService(sSocket.accept());
-                } else {
+                }
+                else if(port == 3000) {
                     service = new AmaService(sSocket.accept());
                 }
             }catch(IOException e) {
-
+                e.printStackTrace();
             }
 
             new Thread(service).start();

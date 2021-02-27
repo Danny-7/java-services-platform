@@ -3,16 +3,12 @@ package server.bri.managers;
 import server.model.Developer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 public class BRIManager {
     private static final UserManager userManager;
-
-    private static final List<Class<?>> startedClasses;
-    private static final List<Class<?>> stoppedClasses;
-    private static final Map<Developer, Vector<Class<?>>> classesDictionnary;
+    private static final Map<Developer, Vector<Class<?>>> classesDictionary;
 
     static {
         userManager = UserManager.getInstance();
@@ -21,9 +17,7 @@ public class BRIManager {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        startedClasses = new Vector<>();
-        stoppedClasses = new Vector<>();
-        classesDictionnary = new HashMap<>();
+        classesDictionary = new HashMap<>();
     }
 
     public static boolean isNotKnownService(Class<?> bean) {
@@ -31,7 +25,7 @@ public class BRIManager {
     }
 
     private static boolean isAuthorizedToPerformAction(Class<?> bean){
-        Vector<Class<?>> serviceVector = classesDictionnary.get(userManager.getCurrentDev());
+        Vector<Class<?>> serviceVector = classesDictionary.get(userManager.getCurrentDev());
         if(serviceVector == null)
             return false;
         return serviceVector.contains(bean);
@@ -42,49 +36,69 @@ public class BRIManager {
         addToDictionary(bean);
     }
 
-    public static boolean stopService(int numService) {
-        Class<?> bean = ServiceManager.getService(numService);
+    /**
+     * Stop a service and this service will be store in a hashmap with the position in the service class list
+     * @param numService index of the service in the list displayed to the client
+     */
+    public static void stopService(int numService) throws Exception {
+        Class<?> bean = ServiceManager.getStartedService(numService);
         if(!isAuthorizedToPerformAction(bean))
-            return false;
+            throw new Exception("You are not allowed to perform this action !");
         if(isNotKnownService(bean))
-            return false;
-        return stoppedClasses.add(bean);
+            throw new Exception("This number doesn't exist !");
+        ServiceManager.stopService(bean);
     }
 
-    public static boolean startService(int numService) {
-        Class<?> bean = ServiceManager.getService(numService);
+    public static void startService(int numService) throws Exception {
+        Class<?> bean = ServiceManager.getStoppedService(numService);
         if(!isAuthorizedToPerformAction(bean))
-            return false;
+            throw new Exception("You are not allowed to perform this action !");
         if(isNotKnownService(bean))
-            return false;
-        stoppedClasses.remove(bean);
-        return startedClasses.add(bean);
+            throw new Exception("This number doesn't exist !");
+        ServiceManager.startService(bean);
     }
 
-    public static boolean uninstallService(int numService) {
+    public static void uninstallService(int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
         if(!isAuthorizedToPerformAction(bean))
-            return false;
+            throw new Exception("You are not allowed to perform this action !");
         if(isNotKnownService(bean))
-            return false;
-        stoppedClasses.remove(bean);
-        startedClasses.remove(bean);
+            throw new Exception("This number doesn't exist !");
         ServiceManager.deleteService(numService);
-        return true;
+    }
+
+    public static void updateService(Class<?> beanUpdated, int numService) throws Exception {
+        Class<?> bean = ServiceManager.getService(numService);
+        if(!isAuthorizedToPerformAction(bean))
+            throw new Exception("You are not allowed to perform this action !");
+        if(isNotKnownService(bean))
+            throw new Exception("This number doesn't exist !");
+        ServiceManager.updateService(beanUpdated, numService);
     }
 
     private static void addToDictionary(Class<?> bean) {
-        if(!classesDictionnary.containsKey(userManager.getCurrentDev())) {
+        if(!classesDictionary.containsKey(userManager.getCurrentDev())) {
             Vector<Class<?>> classes = new Vector<>();
             classes.add(bean);
-            classesDictionnary.put(userManager.getCurrentDev(), classes);
+            classesDictionary.put(userManager.getCurrentDev(), classes);
         }
-        else {
-            classesDictionnary.get(userManager.getCurrentDev()).add(bean);
-        }
+        else
+            classesDictionary.get(userManager.getCurrentDev()).add(bean);
     }
 
     public static void login(String login, String password, String ftpUrl) throws IllegalAccessException {
         userManager.login(login, password, ftpUrl);
+    }
+
+    public static String getStoppedClassesListing() {
+        StringBuilder sb = new StringBuilder();
+        ServiceManager.getStoppedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
+        return sb.replace(sb.length() -1, sb.length(), "").toString();
+    }
+
+    public static String getStartedClassesListing() {
+        StringBuilder sb = new StringBuilder();
+        ServiceManager.getStartedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
+        return sb.replace(sb.length() -1, sb.length(), "").toString();
     }
 }

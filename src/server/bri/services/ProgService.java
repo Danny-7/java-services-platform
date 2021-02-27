@@ -94,39 +94,64 @@ public class ProgService implements Service {
             System.out.println(serviceLoader);
 
             net.send("Please enter the path ?");
-            String path = (String) net.read();
+            String path = net.read().toString();
 
             Class<?> classLoaded = serviceLoader.loadClass(path);
             BRIManager.installService(classLoaded);
-//            net.send("Service "+ classLoaded.getSimpleName() + " added");
         } catch (Exception e) {
-            net.send(e.getMessage());
+            net.send("Error -> " + e.getMessage());
         }
     }
 
     public void startService() {
-        String message = "Choose the service in this list:\n\t" + ServiceManager.serviceListing(); //TODO
+        String message = "Choose the service to start in this list:\n\t" + BRIManager.getStoppedClassesListing();
         net.send(message);
-        int choice = (int) net.read();
-        BRIManager.startService(choice);
+        try {
+            int choice = Integer.parseInt(net.read().toString());
+            BRIManager.startService(choice);
+        } catch (Exception e) {
+            net.send("Error -> " + e.getMessage());
+        }
     }
 
     public void stopService() {
-        String message = "Choose the service in this list:\n\t" + ServiceManager.serviceListing(); //TODO
+        String message = "Choose the service to stop in this list:\n\t" + BRIManager.getStartedClassesListing();
         net.send(message);
-        int choice = (int) net.read();
-        BRIManager.stopService(choice);
+        try {
+            int choice = Integer.parseInt(net.read().toString());
+            BRIManager.stopService(choice);
+        } catch (Exception e) {
+            net.send("Error -> " + e.getMessage());
+        }
     }
     
     public void update(){
-        // TODO
+        String message = "Choose the service to update within in this list:\n\t" + ServiceManager.serviceListing();
+        net.send(message);
+
+        try {
+            int choice = Integer.parseInt(net.read().toString());
+            net.send("Enter the path to the updated class");
+            String path = net.read().toString();
+
+            ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
+            Class<?> bean = serviceLoader.loadUpdatedClass(path);
+            BRIManager.updateService(bean, choice);
+
+        }catch (Exception e ) {
+            net.send(e.getMessage());
+        }
     }
     
     public void uninstall() {
-            String message = "Choose the service in this list:\n\t" + ServiceManager.serviceListing(); //TODO
-            net.send(message);
-            int choice = (int) net.read();
+        String message = "Choose the service in this list:\n\t" + ServiceManager.serviceListing(); //TODO
+        net.send(message);
+        try {
+            int choice = Integer.parseInt(net.read().toString());
             BRIManager.uninstallService(choice);
+        } catch (Exception e) {
+            net.send("Error -> " + e.getMessage());
+        }
     }
 
     private Object[] verifyCredentials(String credentials) throws Exception{

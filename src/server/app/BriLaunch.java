@@ -11,5 +11,7 @@ public class BriLaunch {
         System.out.println(displayedMessage);
 
         new Thread(new Server(4000)).start();
+        new Thread(new Server(3000)).start();
+
     }
 }
