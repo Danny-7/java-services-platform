@@ -23,19 +23,15 @@ public class Server implements Runnable {
     @Override
     public void run() {
         while(true) {
-            Service service = null;
             try {
-                if (port == 4000) {
-                    service = new ProgService(sSocket.accept());
-                }
-                else if(port == 3000) {
-                    service = new AmaService(sSocket.accept());
+                switch (port) {
+                    case 4000 -> new ProgService(sSocket.accept());
+                    case 3000 -> new AmaService(sSocket.accept());
+                    default -> throw new IOException("This port doesn't exist");
                 }
             }catch(IOException e) {
                 e.printStackTrace();
             }
-
-            new Thread(service).start();
         }
     }
 }

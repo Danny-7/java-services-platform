@@ -104,6 +104,8 @@ public class ServiceManager {
         StringBuilder sb = new StringBuilder();
         sb.append("Services available: \t");
         serviceClassList.forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-        return sb.replace(sb.length() -1, sb.length(), "").toString();
+        if(!sb.isEmpty())
+            sb.replace(sb.length() -1, sb.length(), "");
+        return sb.toString();
     }
 }

@@ -1,37 +1,44 @@
 package server.bri.services;
 
 
-import server.bri.NetworkData;
-import server.bri.Service;
 import server.bri.managers.BRIManager;
 import server.bri.managers.ServiceManager;
+import utils.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 
-public class AmaService implements Service {
-    private NetworkData net;
+public class AmaService implements Runnable {
+    private final NetworkData net;
+    private final Socket socket;
 
     public AmaService(Socket socket) {
         net = new NetworkData(socket);
+        this.socket = socket;
+        new Thread(this).start();
     }
 
     @Override
     public void run() {
         try {
-            Class.forName("server.bri.managers.ServiceManager");
-            String services = "Choose a service to use :\n\t" + BRIManager.getStartedClassesListing();
+            String classes = BRIManager.getStartedClassesListing();
+            String services = "Choose a service to use :\n\t" + classes;
             net.send(services);
 
             int serviceToLaunch = Integer.parseInt(net.read().toString());
 
             Class<?> serviceClass = ServiceManager.getService(serviceToLaunch);
-            // instantiation of the service
-            Service service = (Service) serviceClass.newInstance();
-            new Thread(service).start();
+            // service instantiation
+            if(serviceClass == null)
+                throw new RuntimeException("Can't use the service asked");
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-//            net.send(e.getMessage());
-            e.printStackTrace();
+            Object[] initArgs = new Object[]{socket, net};
+            Service service = (Service) serviceClass
+                    .getConstructor(Socket.class, NetworkData.class).newInstance(initArgs);
+            service.run();
+
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            net.send(e.getMessage());
         }
     }
 }

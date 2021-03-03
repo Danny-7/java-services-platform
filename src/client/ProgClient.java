@@ -1,6 +1,7 @@
 package client;
 
-import server.bri.NetworkData;
+
+import utils.NetworkData;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -20,7 +21,7 @@ public class ProgClient {
             System.out.format("You are connected on port %d at %s\n", PORT, HOST);
 
             while(true) {
-                String message = (String) net.read();
+                String message = net.read().toString();
                 System.out.println(message);
                 String answer = sc.nextLine();
                 net.send(answer);
@@ -28,7 +29,5 @@ public class ProgClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 }

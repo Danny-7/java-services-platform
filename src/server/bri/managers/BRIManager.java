@@ -3,6 +3,7 @@ package server.bri.managers;
 import server.model.Developer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -93,7 +94,9 @@ public class BRIManager {
     public static String getStoppedClassesListing() {
         StringBuilder sb = new StringBuilder();
         ServiceManager.getStoppedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-        return sb.replace(sb.length() -1, sb.length(), "").toString();
+        if(!sb.isEmpty())
+            sb.replace(sb.length() -1, sb.length(), "");
+        return sb.toString();
     }
 
     public static String getStartedClassesListing() {
@@ -101,4 +104,12 @@ public class BRIManager {
         ServiceManager.getStartedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
         return sb.replace(sb.length() -1, sb.length(), "").toString();
     }
+
+//    public static String getListing(List<Class<?>> list) {
+//        StringBuilder sb = new StringBuilder();
+//        ServiceManager.getStoppedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
+//        if(!sb.isEmpty())
+//            sb.replace(sb.length() -1, sb.length(), "");
+//        return sb.toString();
+//    }
 }

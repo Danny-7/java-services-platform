@@ -1,19 +1,22 @@
 package server.bri.services;
 
-import server.bri.NetworkData;
-import server.bri.Service;
 import server.bri.loaders.ServiceLoader;
 import server.bri.managers.BRIManager;
 import server.bri.managers.ServiceManager;
 import server.bri.managers.UserManager;
+import utils.NetworkData;
 
 import java.net.Socket;
 
-public class ProgService implements Service {
+public class ProgService implements Runnable {
     private final NetworkData net;
     private UserManager userManager;
 
-    public ProgService(Socket socket) { net = new NetworkData(socket); }
+    public ProgService(Socket socket) {
+        net = new NetworkData(socket);
+        new Thread(this).start();
+    }
+
     @Override
     public void run() {
         // ask to login
@@ -100,6 +103,7 @@ public class ProgService implements Service {
             BRIManager.installService(classLoaded);
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
