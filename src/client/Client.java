@@ -1,29 +1,27 @@
 package client;
 
-
 import utils.NetworkData;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class ProgClient {
-    private static Socket socket;
+public class Client {
     private static final String HOST = "localhost";
-    private static final int PORT = 4000;
 
     public static void main(String[] args) {
+        int port = Integer.parseInt(args[0]);
         try {
-            socket = new Socket(HOST, PORT);
+            Socket socket = new Socket(HOST, port);
             NetworkData net = new NetworkData(socket);
             Scanner sc = new Scanner(System.in);
 
-            System.out.format("You are connected on port %d at %s\n", PORT, HOST);
+            System.out.format("You are connected on port %d at %s\n", port, HOST);
 
+            new ServerListener(net.getIn());
+            String answer;
             while(true) {
-                String message = net.read().toString();
-                System.out.println(message);
-                String answer = sc.nextLine();
+                while((answer = sc.nextLine()).isEmpty());
                 net.send(answer);
             }
         } catch (IOException e) {
