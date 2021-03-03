@@ -31,7 +31,7 @@ public class ProgService implements Runnable {
         } catch (ClassNotFoundException e) {
             net.send(e.getMessage());
         }
-
+        // login verification
         do {
             try {
                 Object[] credentialsVerified = verifyCredentials(credentials);
@@ -46,8 +46,6 @@ public class ProgService implements Runnable {
         }while(notConform);
 
         // list all features available
-        boolean stop = false;
-
         String messageToSend = """
                 Welcome to the BRI manager for incredible programmers !
                 You can do these following actions :
@@ -57,34 +55,22 @@ public class ProgService implements Runnable {
                 \t- Update a service [4]
                 \t- Uninstall a service [5]""";
 
+        boolean stop;
         do {
             net.send(messageToSend);
             String choice = net.read().toString();
 
-            if(choice.equals("stop")) {
-                stop = true;
-                break;
-            }
+            stop = choice.equals("stop");
 
             int choiceInteger = Integer.parseInt(choice);
 
             switch(choiceInteger) {
-                case 1:
-                    installService();
-                    break;
-                case 2:
-                    startService();
-                    break;
-                case 3:
-                    stopService();
-                case 4:
-                    update();
-                    break;
-                case 5:
-                    uninstall();
-                    break;
-                default:
-                    net.send("This choice doesn't exist");
+                case 1 -> installService();
+                case 2 -> startService();
+                case 3 -> stopService();
+                case 4 -> update();
+                case 5 -> uninstall();
+                default -> net.send("This choice doesn't exist");
             }
         }while(!stop);
 
