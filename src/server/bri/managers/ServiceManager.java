@@ -1,5 +1,6 @@
 package server.bri.managers;
 
+import server.bri.managers.utils.BRIUtil;
 import server.bri.tools.ValidateService;
 
 import java.util.Iterator;
@@ -24,10 +25,7 @@ public class ServiceManager {
         return stoppedClasses;
     }
 
-    public static Iterator<Class<?>> getServiceIterator() {
-        return serviceClassList.iterator();
-    }
-
+    public static Iterator<Class<?>> getServiceIterator() { return serviceClassList.iterator();}
     /**
      * A service class is added by default in the stopped services
      * @param serviceClass class to be added
@@ -82,18 +80,18 @@ public class ServiceManager {
         startedClasses.add(bean);
     }
 
-    public static void updateService(Class<?> bean, int index) {
-        // TODO verify equals method of a class
+    public static void updateService(Class<?> beanToReplace, Class<?> bean, int index) {
+        // TODO see with Mr Brette if we override equals method or we keep this strategy
+        // TODO ask to Mr Brette if the updated service is set to the oldest state or reset to stopped state
         serviceClassList.setElementAt(bean, index - 1);
-        if(stoppedClasses.contains(bean)) {
-            int beanIndex = stoppedClasses.indexOf(bean);
+        if(stoppedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
+            int beanIndex = stoppedClasses.indexOf(beanToReplace);
             stoppedClasses.setElementAt(bean, beanIndex);
         }
-        else if(startedClasses.contains(bean)) {
-            int beanIndex = stoppedClasses.indexOf(bean);
+        else if(startedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
+            int beanIndex = startedClasses.indexOf(beanToReplace);
             stoppedClasses.setElementAt(bean, beanIndex);
         }
-
     }
 
     public static boolean isAvailable(Class<?> serviceClass) {
@@ -101,11 +99,7 @@ public class ServiceManager {
     }
 
     public static String serviceListing() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Services available: \t");
-        serviceClassList.forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-        if(!sb.isEmpty())
-            sb.replace(sb.length() -1, sb.length(), "");
-        return sb.toString();
+        return BRIUtil.getListing(serviceClassList);
     }
+
 }

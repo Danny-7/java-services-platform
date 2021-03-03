@@ -1,9 +1,9 @@
 package server.bri.managers;
 
+import server.bri.managers.utils.BRIUtil;
 import server.model.Developer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -74,7 +74,8 @@ public class BRIManager {
             throw new Exception("You are not allowed to perform this action !");
         if(isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
-        ServiceManager.updateService(beanUpdated, numService);
+        ServiceManager.updateService(bean, beanUpdated, numService);
+        updateDictionary(bean, beanUpdated);
     }
 
     private static void addToDictionary(Class<?> bean) {
@@ -87,29 +88,20 @@ public class BRIManager {
             classesDictionary.get(userManager.getCurrentDev()).add(bean);
     }
 
+    private static void updateDictionary(Class<?> bean, Class<?> beanUpdated) {
+        int beanIndex = classesDictionary.get(userManager.getCurrentDev()).indexOf(bean);
+        classesDictionary.get(userManager.getCurrentDev()).setElementAt(beanUpdated, beanIndex);
+    }
+
     public static void login(String login, String password, String ftpUrl) throws IllegalAccessException {
         userManager.login(login, password, ftpUrl);
     }
 
     public static String getStoppedClassesListing() {
-        StringBuilder sb = new StringBuilder();
-        ServiceManager.getStoppedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-        if(!sb.isEmpty())
-            sb.replace(sb.length() -1, sb.length(), "");
-        return sb.toString();
+        return BRIUtil.getListing(ServiceManager.getStoppedClasses());
     }
 
     public static String getStartedClassesListing() {
-        StringBuilder sb = new StringBuilder();
-        ServiceManager.getStartedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-        return sb.replace(sb.length() -1, sb.length(), "").toString();
+        return BRIUtil.getListing(ServiceManager.getStartedClasses());
     }
-
-//    public static String getListing(List<Class<?>> list) {
-//        StringBuilder sb = new StringBuilder();
-//        ServiceManager.getStoppedClasses().forEach(s -> sb.append(s.getSimpleName()).append("\n"));
-//        if(!sb.isEmpty())
-//            sb.replace(sb.length() -1, sb.length(), "");
-//        return sb.toString();
-//    }
 }

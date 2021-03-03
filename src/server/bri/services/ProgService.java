@@ -25,12 +25,6 @@ public class ProgService implements Runnable {
         String credentials = net.read().toString();
         boolean notConform;
 
-        try {
-            Class.forName("server.bri.managers.UserManager");
-            Class.forName("server.bri.managers.BRIManager");
-        } catch (ClassNotFoundException e) {
-            net.send(e.getMessage());
-        }
         // login verification
         do {
             try {
@@ -80,13 +74,13 @@ public class ProgService implements Runnable {
     public void installService() {
         try {
             ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
-            System.out.println(serviceLoader);
 
             net.send("Please enter the path ?");
             String path = net.read().toString();
 
             Class<?> classLoaded = serviceLoader.loadClass(path);
             BRIManager.installService(classLoaded);
+            net.send("Service was added successfully");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
             e.printStackTrace();
@@ -99,6 +93,7 @@ public class ProgService implements Runnable {
         try {
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.startService(choice);
+            net.send("Service started successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
         }
@@ -110,6 +105,7 @@ public class ProgService implements Runnable {
         try {
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.stopService(choice);
+            net.send("Service sopped successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
         }
@@ -127,6 +123,7 @@ public class ProgService implements Runnable {
             ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
             Class<?> bean = serviceLoader.loadUpdatedClass(path);
             BRIManager.updateService(bean, choice);
+            net.send("Service updated successfully ");
 
         }catch (Exception e ) {
             net.send(e.getMessage());
@@ -139,6 +136,7 @@ public class ProgService implements Runnable {
         try {
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.uninstallService(choice);
+            net.send("Service uninstalled successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
         }
