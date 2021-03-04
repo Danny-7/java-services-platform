@@ -32,7 +32,7 @@ public class ServiceManager {
      * @throws Exception Return an exception if the class already exists or if it's not conform
      */
     public static void addService(Class<?> serviceClass) throws Exception {
-        if(stoppedClasses.contains(serviceClass) || startedClasses.contains(serviceClass))
+        if(serviceClassList.stream().anyMatch(c -> c.getName().equals(serviceClass.getName())))
             throw new IllegalArgumentException("This service class already exists !");
         ValidateService.isConform(serviceClass);
         stoppedClasses.add(serviceClass);
@@ -68,6 +68,7 @@ public class ServiceManager {
         Class<?> bean = serviceClassList.get(num);
         stoppedClasses.remove(bean);
         startedClasses.remove(bean);
+        serviceClassList.removeElement(bean);
     }
 
     public static void stopService(Class<?> bean) {
@@ -90,7 +91,7 @@ public class ServiceManager {
         }
         else if(startedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
             int beanIndex = startedClasses.indexOf(beanToReplace);
-            stoppedClasses.setElementAt(bean, beanIndex);
+            startedClasses.setElementAt(bean, beanIndex);
         }
     }
 

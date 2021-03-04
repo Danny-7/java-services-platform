@@ -11,6 +11,7 @@ import java.net.Socket;
 public class ProgService implements Runnable {
     private final NetworkData net;
     private UserManager userManager;
+    private static final String MSG_NO_SERVICE = "There's any service available !";
 
     public ProgService(Socket socket) {
         net = new NetworkData(socket);
@@ -28,12 +29,9 @@ public class ProgService implements Runnable {
         // login verification
         do {
             try {
-                credentials = net.read().toString();
-                Object[] credentialsVerified = verifyCredentials(credentials);
-                notConform = !(boolean) credentialsVerified[0];
-                String[] credentialsSplit = (String[]) credentialsVerified[1];
                 this.userManager = UserManager.getInstance();
-                BRIManager.login(credentialsSplit[0], credentialsSplit[1], credentialsSplit[2]);
+                credentials = net.read().toString();
+                notConform = authenticate(credentials);
             } catch (Exception e) {
                 net.send(e.getMessage());
                 net.send("Try again");
@@ -69,9 +67,18 @@ public class ProgService implements Runnable {
                 case 5 -> uninstall();
                 default -> net.send("This choice doesn't exist");
             }
+            System.out.println(ServiceManager.serviceListing());
         }while(!stop);
 
+    }
 
+    public boolean authenticate(String credentials) throws Exception {
+        boolean notConform;
+        Object[] credentialsVerified = verifyCredentials(credentials);
+        notConform = !(boolean) credentialsVerified[0];
+        String[] credentialsSplit = (String[]) credentialsVerified[1];
+        BRIManager.login(credentialsSplit[0], credentialsSplit[1], credentialsSplit[2]);
+        return notConform;
     }
 
     public void installService() {
@@ -86,14 +93,18 @@ public class ProgService implements Runnable {
             net.send("Service was added successfully");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
     public void startService() {
-        String message = "Choose the service to start in this list:\n\t" + BRIManager.getStoppedClassesListing();
-        net.send(message);
+        String startedServices = BRIManager.getStoppedClassesListing();
+
         try {
+            if(startedServices.isBlank())
+                throw new Exception(MSG_NO_SERVICE);
+            String message = "Choose the service to start in this list:\n\t" + startedServices;
+            net.send(message);
+
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.startService(choice);
             net.send("Service started successfully ");
@@ -103,9 +114,14 @@ public class ProgService implements Runnable {
     }
 
     public void stopService() {
-        String message = "Choose the service to stop in this list:\n\t" + BRIManager.getStartedClassesListing();
-        net.send(message);
+        String stoppedServices = BRIManager.getStartedClassesListing();
+
         try {
+            if(stoppedServices.isBlank())
+                throw new Exception(MSG_NO_SERVICE);
+            String message = "Choose the service to stop in this list:\n\t" + stoppedServices;
+            net.send(message);
+
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.stopService(choice);
             net.send("Service sopped successfully ");
@@ -115,10 +131,13 @@ public class ProgService implements Runnable {
     }
     
     public void update(){
-        String message = "Choose the service to update within in this list:\n\t" + ServiceManager.serviceListing();
-        net.send(message);
-
+        String services = ServiceManager.serviceListing();
         try {
+            if(services.isBlank())
+                throw new Exception(MSG_NO_SERVICE);
+            String message = "Choose the service to update within in this list:\n\t" + services;
+            net.send(message);
+
             int choice = Integer.parseInt(net.read().toString());
             net.send("Enter the path to the updated class");
             String path = net.read().toString();
@@ -134,9 +153,13 @@ public class ProgService implements Runnable {
     }
     
     public void uninstall() {
-        String message = "Choose the service in this list:\n\t" + ServiceManager.serviceListing(); //TODO
-        net.send(message);
+        String services = ServiceManager.serviceListing();
         try {
+            if(services.isBlank())
+                throw new Exception(MSG_NO_SERVICE);
+            String message = "Choose the service in this list:\n\t" + services;
+            net.send(message);
+
             int choice = Integer.parseInt(net.read().toString());
             BRIManager.uninstallService(choice);
             net.send("Service uninstalled successfully ");
