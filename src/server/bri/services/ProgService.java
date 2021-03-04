@@ -22,12 +22,13 @@ public class ProgService implements Runnable {
         // ask to login
         net.send("Please you have to be logged in ! Enter you login pwd and server url. Follow this model -> [login]&[password]&[ftp server url]");
 
-        String credentials = net.read().toString();
+        String credentials;
         boolean notConform;
 
         // login verification
         do {
             try {
+                credentials = net.read().toString();
                 Object[] credentialsVerified = verifyCredentials(credentials);
                 notConform = !(boolean) credentialsVerified[0];
                 String[] credentialsSplit = (String[]) credentialsVerified[1];
@@ -35,13 +36,15 @@ public class ProgService implements Runnable {
                 BRIManager.login(credentialsSplit[0], credentialsSplit[1], credentialsSplit[2]);
             } catch (Exception e) {
                 net.send(e.getMessage());
+                net.send("Try again");
                 notConform = true;
             }
         }while(notConform);
 
+        net.send("Welcome to the BRI manager for incredible programmers !");
         // list all features available
         String messageToSend = """
-                Welcome to the BRI manager for incredible programmers !
+                                
                 You can do these following actions :
                 \t- Install a service from you ftp server [1]
                 \t- Start a service [2]
@@ -144,7 +147,10 @@ public class ProgService implements Runnable {
 
     private Object[] verifyCredentials(String credentials) throws Exception{
         String[] credentialsSplit = credentials.split("&");
+        int nbArgs = 3;
 
+        if(credentialsSplit.length != nbArgs)
+            throw new Exception("You have to give three arguments separated by '.'");
         if(credentialsSplit[0].isEmpty() || credentialsSplit[1].isEmpty() || credentialsSplit[2].isEmpty())
             throw new Exception("You have to fill all fields");
         if(!credentialsSplit[2].startsWith("ftp://"))
