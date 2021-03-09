@@ -1,7 +1,9 @@
 package server.bri.tools;
 
-import server.bri.Service;
 import server.bri.managers.ServiceManager;
+import utils.NetworkData;
+import utils.Service;
+
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -12,20 +14,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Properties;
 
-public class MailSender implements Service
+public class MailSender extends Service
 {
     private final Socket client;
     private String mail;
     private String messageSend;
 
-
-    public MailSender ()
+    public MailSender(Socket s, NetworkData net)
     {
-        this.client = null;
-    }
-
-    public MailSender(Socket s)
-    {
+        super(net);
         this.client = s;
     }
 
@@ -64,53 +61,30 @@ public class MailSender implements Service
         Message message = new MimeMessage(s);
         try {
             message.setFrom(new InternetAddress(account));
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-        try {
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(copyDest));
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-        try {
             message.setSubject("testEnvoiMail");
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-        try {
             message.setText(messageSend);
+
+
         } catch (MessagingException e) {
             e.printStackTrace();
         }
         return message;
-
     }
-
 
     @Override
     public synchronized void run()
     {
-        try {
-            BufferedReader in = new BufferedReader (new InputStreamReader(client.getInputStream ( )));
-            PrintWriter out = new PrintWriter(client.getOutputStream ( ), true);
-            out.println("Type the email address ");
-            mail = in.readLine();
-            out.println("type the text to be sent");
-            messageSend = in.readLine();
-            sendMail(mail, messageSend);
-            out.println("Message envoyé #n"+ ServiceManager.serviceListing() + " # Tapez le numéro de service désiré :# 1 pour lancer un service # 2 pour lister les services # 3 pour se déconnecter # suivi du nom du service");
-        }
-        catch (IOException e) {
-            System.err.println("End of the mail sending service");
-        }
-
-
-
+        NetworkData net = super.getNet();
+        net.send("Type the email address ");
+        mail = net.read().toString();
+        net.send("Type the text to be sent");
+        messageSend = net.read().toString();
+        sendMail(mail, messageSend);
+        net.send("Message sent to -> " + mail);
     }
-    protected void finalize() throws Throwable {
-        client.close();
-    }
+
     public static String toStringue() {
-        return "ServiceEnvoiMail";
+        return "ServiceMailSender";
     }
 }
