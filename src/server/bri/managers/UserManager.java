@@ -32,8 +32,8 @@ public class UserManager {
 
     public void login(String login, String pwd, String ftpServer) throws IllegalAccessException {
         Developer dev = new Developer(login, pwd, ftpServer);
-//        if (currentDev.equals(dev))
-//            throw new IllegalAccessException("You are already connected as " + currentDev.getLogin());
+        if (currentDev != null && currentDev.equals(dev))
+            throw new IllegalAccessException("You are already connected as " + currentDev.getLogin());
         if(!isDeveloper(dev))
             throw new IllegalAccessException("This developer doesn't exist");
         currentDev = dev;

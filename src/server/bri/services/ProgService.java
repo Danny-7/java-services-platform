@@ -4,6 +4,7 @@ import server.bri.loaders.ServiceLoader;
 import server.bri.managers.BRIManager;
 import server.bri.managers.ServiceManager;
 import server.bri.managers.UserManager;
+import server.model.Developer;
 import utils.NetworkData;
 
 import java.net.Socket;
@@ -48,7 +49,8 @@ public class ProgService implements Runnable {
                 \t- Start a service [2]
                 \t- Stop a service [3]
                 \t- Update a service [4]
-                \t- Uninstall a service [5]""";
+                \t- Uninstall a service [5]
+                \t- Modify url ftp server[6]""";
 
         boolean stop;
         do {
@@ -65,6 +67,7 @@ public class ProgService implements Runnable {
                 case 3 -> stopService();
                 case 4 -> update();
                 case 5 -> uninstall();
+                case 6 -> modifyServerUrl();
                 default -> net.send("This choice doesn't exist");
             }
             System.out.println(ServiceManager.serviceListing());
@@ -165,6 +168,23 @@ public class ProgService implements Runnable {
             net.send("Service uninstalled successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
+        }
+    }
+
+    public void modifyServerUrl() {
+        try {
+            Developer dev = UserManager.getInstance().getCurrentDev();
+            if(dev == null)
+                throw new IllegalStateException("You can't do this action because you are not logged");
+            net.send("Enter you new ftp url server");
+            String newUrl = net.read().toString();
+            if(newUrl.isBlank())
+                throw new IllegalAccessException("Please enter a valid url");
+            dev.setFtpUrl(newUrl);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            net.send(e.getMessage());
         }
     }
 

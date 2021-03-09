@@ -29,6 +29,10 @@ public class Developer {
         return ftpUrl;
     }
 
+    public void setFtpUrl(String ftpUrl) {
+        this.ftpUrl = ftpUrl;
+    }
+
     public boolean isCertified() {
         return isCertified;
     }
