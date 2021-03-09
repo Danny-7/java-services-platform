@@ -1,4 +1,4 @@
-package server.bri.utils;
+package server.bri.tools;
 
 import server.bri.Service;
 import server.bri.managers.ServiceManager;
