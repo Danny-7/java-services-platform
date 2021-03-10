@@ -25,9 +25,9 @@ public class BRIManager {
         return !ServiceManager.isAvailable(bean);
     }
 
-    private static boolean isAuthorizedToPerformAction(Class<?> bean){
+    private static boolean isAuthorizedToPerformAction(Class<?> bean) {
         Vector<Class<?>> serviceVector = classesDictionary.get(userManager.getCurrentDev());
-        if(serviceVector == null)
+        if (serviceVector == null)
             return false;
         return serviceVector.contains(bean);
     }
@@ -39,52 +39,52 @@ public class BRIManager {
 
     /**
      * Stop a service and this service will be store in a hashmap with the position in the service class list
+     *
      * @param numService index of the service in the list displayed to the client
      */
     public static void stopService(int numService) throws Exception {
         Class<?> bean = ServiceManager.getStartedService(numService);
-        if(!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(bean))
             throw new Exception("You are not allowed to perform this action !");
-        if(isNotKnownService(bean))
+        if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.stopService(bean);
     }
 
     public static void startService(int numService) throws Exception {
         Class<?> bean = ServiceManager.getStoppedService(numService);
-        if(!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(bean))
             throw new Exception("You are not allowed to perform this action !");
-        if(isNotKnownService(bean))
+        if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.startService(bean);
     }
 
     public static void uninstallService(int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if(!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(bean))
             throw new Exception("You are not allowed to perform this action !");
-        if(isNotKnownService(bean))
+        if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.deleteService(numService);
     }
 
     public static void updateService(Class<?> beanUpdated, int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if(!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(bean))
             throw new Exception("You are not allowed to perform this action !");
-        if(isNotKnownService(bean))
+        if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.updateService(bean, beanUpdated, numService);
         updateDictionary(bean, beanUpdated);
     }
 
     private static void addToDictionary(Class<?> bean) {
-        if(!classesDictionary.containsKey(userManager.getCurrentDev())) {
+        if (!classesDictionary.containsKey(userManager.getCurrentDev())) {
             Vector<Class<?>> classes = new Vector<>();
             classes.add(bean);
             classesDictionary.put(userManager.getCurrentDev(), classes);
-        }
-        else
+        } else
             classesDictionary.get(userManager.getCurrentDev()).add(bean);
     }
 

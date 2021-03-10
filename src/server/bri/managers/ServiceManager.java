@@ -25,14 +25,18 @@ public class ServiceManager {
         return stoppedClasses;
     }
 
-    public static Iterator<Class<?>> getServiceIterator() { return serviceClassList.iterator();}
+    public static Iterator<Class<?>> getServiceIterator() {
+        return serviceClassList.iterator();
+    }
+
     /**
      * A service class is added by default in the stopped services
+     *
      * @param serviceClass class to be added
      * @throws Exception Return an exception if the class already exists or if it's not conform
      */
     public static void addService(Class<?> serviceClass) throws Exception {
-        if(serviceClassList.stream().anyMatch(c -> c.getName().equals(serviceClass.getName())))
+        if (serviceClassList.stream().anyMatch(c -> c.getName().equals(serviceClass.getName())))
             throw new IllegalArgumentException("This service class already exists !");
         ValidateService.isConform(serviceClass);
         stoppedClasses.add(serviceClass);
@@ -40,30 +44,30 @@ public class ServiceManager {
     }
 
     public static Class<?> getService(int numService) {
-        int num = numService -1;
-        if(serviceClassList.isEmpty() || num > serviceClassList.size())
+        int num = numService - 1;
+        if (serviceClassList.isEmpty() || num > serviceClassList.size())
             return null;
         return serviceClassList.get(num);
     }
 
-    public static Class<?> getStartedService(int numService){
-        int num = numService -1;
-        if(startedClasses.isEmpty() || num > startedClasses.size())
+    public static Class<?> getStartedService(int numService) {
+        int num = numService - 1;
+        if (startedClasses.isEmpty() || num > startedClasses.size())
             return null;
         return startedClasses.get(num);
     }
 
-    public static Class<?> getStoppedService(int numService){
-        int num = numService -1;
-        if(stoppedClasses.isEmpty() || num > stoppedClasses.size())
+    public static Class<?> getStoppedService(int numService) {
+        int num = numService - 1;
+        if (stoppedClasses.isEmpty() || num > stoppedClasses.size())
             return null;
         return stoppedClasses.get(num);
     }
 
     public static void deleteService(int numService) throws Exception {
 
-        int num = numService -1;
-        if(serviceClassList.isEmpty() || num > serviceClassList.size())
+        int num = numService - 1;
+        if (serviceClassList.isEmpty() || num > serviceClassList.size())
             throw new Exception("This number is not associated to a known service");
         Class<?> bean = serviceClassList.get(num);
         stoppedClasses.remove(bean);
@@ -82,14 +86,11 @@ public class ServiceManager {
     }
 
     public static void updateService(Class<?> beanToReplace, Class<?> bean, int index) {
-        // TODO see with Mr Brette if we override equals method or we keep this strategy
-        // TODO ask to Mr Brette if the updated service is set to the oldest state or reset to stopped state
         serviceClassList.setElementAt(bean, index - 1);
-        if(stoppedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
+        if (stoppedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
             int beanIndex = stoppedClasses.indexOf(beanToReplace);
             stoppedClasses.setElementAt(bean, beanIndex);
-        }
-        else if(startedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
+        } else if (startedClasses.stream().anyMatch(c -> c.getName().equals(bean.getName()))) {
             int beanIndex = startedClasses.indexOf(beanToReplace);
             startedClasses.setElementAt(bean, beanIndex);
         }

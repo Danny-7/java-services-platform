@@ -8,7 +8,8 @@ public class Developer {
     private String ftpUrl;
     private boolean isCertified;
 
-    public Developer() {}
+    public Developer() {
+    }
 
     public Developer(String login, String pwd, String ftpUrl) {
         this.login = login;

@@ -1,6 +1,6 @@
 package server.bri.services;
 
-import server.bri.loaders.ServiceLoader;
+import server.bri.loaders.ClassLoader;
 import server.bri.managers.BRIManager;
 import server.bri.managers.ServiceManager;
 import server.bri.managers.UserManager;
@@ -10,9 +10,9 @@ import utils.NetworkData;
 import java.net.Socket;
 
 public class ProgService implements Runnable {
+    private static final String MSG_NO_SERVICE = "There's any service available !";
     private final NetworkData net;
     private UserManager userManager;
-    private static final String MSG_NO_SERVICE = "There's any service available !";
 
     public ProgService(Socket socket) {
         net = new NetworkData(socket);
@@ -38,7 +38,7 @@ public class ProgService implements Runnable {
                 net.send("Try again");
                 notConform = true;
             }
-        }while(notConform);
+        } while (notConform);
 
         net.send("Welcome to the BRI manager for incredible programmers !");
         // list all features available
@@ -61,7 +61,7 @@ public class ProgService implements Runnable {
 
             int choiceInteger = Integer.parseInt(choice);
 
-            switch(choiceInteger) {
+            switch (choiceInteger) {
                 case 1 -> installService();
                 case 2 -> startService();
                 case 3 -> stopService();
@@ -71,7 +71,7 @@ public class ProgService implements Runnable {
                 default -> net.send("This choice doesn't exist");
             }
             System.out.println(ServiceManager.serviceListing());
-        }while(!stop);
+        } while (!stop);
 
     }
 
@@ -86,24 +86,36 @@ public class ProgService implements Runnable {
 
     public void installService() {
         try {
-            ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
+            net.send("What's the type of your service ? [.class, .jar]");
+            String fileType = net.read().toString();
 
-            net.send("Please enter the path ?");
-            String path = net.read().toString();
+            boolean JARType = fileType.equals(".jar");
 
-            Class<?> classLoaded = serviceLoader.loadClass(path);
-            BRIManager.installService(classLoaded);
+            String classURL = userManager.getCurrentDev().getFtpUrl();
+            if (JARType) {
+                net.send("Please enter the path to the JAR file ?");
+                String pathToJAR = net.read().toString();
+                classURL += pathToJAR;
+            }
+            BRIManager.installService(loadService("Enter the service to load", classURL));
             net.send("Service was added successfully");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
         }
     }
 
+    public Class<?> loadService(String messageToDisplay, String classUrl) throws Exception {
+        net.send(messageToDisplay);
+        String classToLoad = net.read().toString();
+        ClassLoader serviceLoader = new ClassLoader(classUrl);
+        return serviceLoader.loadClass(classToLoad);
+    }
+
     public void startService() {
         String startedServices = BRIManager.getStoppedClassesListing();
 
         try {
-            if(startedServices.isBlank())
+            if (startedServices.isBlank())
                 throw new Exception(MSG_NO_SERVICE);
             String message = "Choose the service to start in this list:\n\t" + startedServices;
             net.send(message);
@@ -120,7 +132,7 @@ public class ProgService implements Runnable {
         String stoppedServices = BRIManager.getStartedClassesListing();
 
         try {
-            if(stoppedServices.isBlank())
+            if (stoppedServices.isBlank())
                 throw new Exception(MSG_NO_SERVICE);
             String message = "Choose the service to stop in this list:\n\t" + stoppedServices;
             net.send(message);
@@ -132,33 +144,42 @@ public class ProgService implements Runnable {
             net.send("Error -> " + e.getMessage());
         }
     }
-    
-    public void update(){
+
+    public void update() {
         String services = ServiceManager.serviceListing();
         try {
-            if(services.isBlank())
+            if (services.isBlank())
                 throw new Exception(MSG_NO_SERVICE);
             String message = "Choose the service to update within in this list:\n\t" + services;
             net.send(message);
 
             int choice = Integer.parseInt(net.read().toString());
-            net.send("Enter the path to the updated class");
-            String path = net.read().toString();
 
-            ServiceLoader serviceLoader = new ServiceLoader(userManager.getCurrentDev().getFtpUrl());
-            Class<?> bean = serviceLoader.loadUpdatedClass(path);
-            BRIManager.updateService(bean, choice);
+            net.send("What's the type of your service ? [.class, .jar]");
+            String fileType = net.read().toString();
+            boolean JARType = fileType.equals(".jar");
+
+            String classURL = userManager.getCurrentDev().getFtpUrl();
+            if (JARType) {
+                net.send("Please enter the path to the JAR file ?");
+                String pathToJAR = net.read().toString();
+                classURL += pathToJAR;
+            }
+
+            BRIManager.updateService(loadService("Enter the path to the updated service", classURL)
+                    , choice);
             net.send("Service updated successfully ");
 
-        }catch (Exception e ) {
+        } catch (Exception e) {
+            e.printStackTrace();
             net.send(e.getMessage());
         }
     }
-    
+
     public void uninstall() {
         String services = ServiceManager.serviceListing();
         try {
-            if(services.isBlank())
+            if (services.isBlank())
                 throw new Exception(MSG_NO_SERVICE);
             String message = "Choose the service in this list:\n\t" + services;
             net.send(message);
@@ -174,11 +195,11 @@ public class ProgService implements Runnable {
     public void modifyServerUrl() {
         try {
             Developer dev = UserManager.getInstance().getCurrentDev();
-            if(dev == null)
+            if (dev == null)
                 throw new IllegalStateException("You can't do this action because you are not logged");
             net.send("Enter you new ftp url server");
             String newUrl = net.read().toString();
-            if(newUrl.isBlank())
+            if (newUrl.isBlank())
                 throw new IllegalAccessException("Please enter a valid url");
             dev.setFtpUrl(newUrl);
 
@@ -188,15 +209,15 @@ public class ProgService implements Runnable {
         }
     }
 
-    private Object[] verifyCredentials(String credentials) throws Exception{
+    private Object[] verifyCredentials(String credentials) throws Exception {
         String[] credentialsSplit = credentials.split("&");
         int nbArgs = 3;
 
-        if(credentialsSplit.length != nbArgs)
+        if (credentialsSplit.length != nbArgs)
             throw new Exception("You have to give three arguments separated by '.'");
-        if(credentialsSplit[0].isEmpty() || credentialsSplit[1].isEmpty() || credentialsSplit[2].isEmpty())
+        if (credentialsSplit[0].isEmpty() || credentialsSplit[1].isEmpty() || credentialsSplit[2].isEmpty())
             throw new Exception("You have to fill all fields");
-        if(!credentialsSplit[2].startsWith("ftp://"))
+        if (!credentialsSplit[2].startsWith("ftp://"))
             throw new Exception("Your url have to follow this pattern -> ftp://[server url]:[port]");
 
         return new Object[]{true, credentialsSplit};

@@ -6,12 +6,13 @@ import java.util.Vector;
 
 public class UserManager {
     private static Vector<Developer> developers;
-    private Developer currentDev;
     private static UserManager instance;
 
     static {
         instance = new UserManager();
     }
+
+    private Developer currentDev;
 
     private UserManager() {
         developers = new Vector<>();
@@ -22,19 +23,19 @@ public class UserManager {
         return instance;
     }
 
-    public Developer getCurrentDev() {
-        return currentDev;
-    }
-
     private static boolean isDeveloper(Developer dev) {
         return developers.contains(dev);
+    }
+
+    public Developer getCurrentDev() {
+        return currentDev;
     }
 
     public void login(String login, String pwd, String ftpServer) throws IllegalAccessException {
         Developer dev = new Developer(login, pwd, ftpServer);
         if (currentDev != null && currentDev.equals(dev))
             throw new IllegalAccessException("You are already connected as " + currentDev.getLogin());
-        if(!isDeveloper(dev))
+        if (!isDeveloper(dev))
             throw new IllegalAccessException("This developer doesn't exist");
         currentDev = dev;
     }

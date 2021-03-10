@@ -20,8 +20,8 @@ public class Client {
 
             new ServerListener(net.getIn());
             String answer;
-            while(true) {
-                while((answer = sc.nextLine()).isEmpty());
+            while (true) {
+                while ((answer = sc.nextLine()).isEmpty()) ;
                 net.send(answer);
             }
         } catch (IOException e) {

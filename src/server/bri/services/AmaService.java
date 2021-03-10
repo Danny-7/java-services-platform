@@ -3,7 +3,8 @@ package server.bri.services;
 
 import server.bri.managers.BRIManager;
 import server.bri.managers.ServiceManager;
-import utils.*;
+import utils.NetworkData;
+import utils.Service;
 
 import java.net.Socket;
 
@@ -28,7 +29,7 @@ public class AmaService implements Runnable {
 
             Class<?> serviceClass = ServiceManager.getService(serviceToLaunch);
             // service instantiation
-            if(serviceClass == null)
+            if (serviceClass == null)
                 throw new RuntimeException("Can't use the service asked");
 
             Object[] initArgs = new Object[]{socket, net};

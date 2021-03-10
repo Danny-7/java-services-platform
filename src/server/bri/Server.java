@@ -22,14 +22,14 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        while(true) {
+        while (true) {
             try {
                 switch (port) {
                     case 4000 -> new ProgService(sSocket.accept());
                     case 3000 -> new AmaService(sSocket.accept());
                     default -> throw new IOException("This port doesn't exist");
                 }
-            }catch(IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
