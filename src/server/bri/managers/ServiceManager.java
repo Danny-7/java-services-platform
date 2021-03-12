@@ -2,6 +2,7 @@ package server.bri.managers;
 
 import server.bri.managers.utils.BRIUtil;
 import server.bri.tools.ValidateService;
+import server.model.Developer;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -35,10 +36,11 @@ public class ServiceManager {
      * @param serviceClass class to be added
      * @throws Exception Return an exception if the class already exists or if it's not conform
      */
-    public static void addService(Class<?> serviceClass) throws Exception {
+    public static void addService(Developer dev, Class<?> serviceClass) throws Exception {
         if (serviceClassList.stream().anyMatch(c -> c.getName().equals(serviceClass.getName())))
             throw new IllegalArgumentException("This service class already exists !");
-        ValidateService.isConform(serviceClass);
+        ValidateService validateService = new ValidateService(dev);
+        validateService.isConform(serviceClass);
         stoppedClasses.add(serviceClass);
         serviceClassList.add(serviceClass);
     }

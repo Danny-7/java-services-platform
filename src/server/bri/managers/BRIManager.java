@@ -8,16 +8,14 @@ import java.util.Map;
 import java.util.Vector;
 
 public class BRIManager {
-    private static final UserManager userManager;
     private static final Map<Developer, Vector<Class<?>>> classesDictionary;
 
     static {
-        userManager = UserManager.getInstance();
-        try {
-            Class.forName("server.bri.managers.ServiceManager");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Class.forName("server.bri.managers.ServiceManager");
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
         classesDictionary = new HashMap<>();
     }
 
@@ -25,16 +23,16 @@ public class BRIManager {
         return !ServiceManager.isAvailable(bean);
     }
 
-    private static boolean isAuthorizedToPerformAction(Class<?> bean) {
-        Vector<Class<?>> serviceVector = classesDictionary.get(userManager.getCurrentDev());
+    private static boolean isAuthorizedToPerformAction(Developer dev, Class<?> bean) {
+        Vector<Class<?>> serviceVector = classesDictionary.get(dev);
         if (serviceVector == null)
             return false;
         return serviceVector.contains(bean);
     }
 
-    public static void installService(Class<?> bean) throws Exception {
-        ServiceManager.addService(bean);
-        addToDictionary(bean);
+    public static void installService(Developer dev, Class<?> bean) throws Exception {
+        ServiceManager.addService(dev, bean);
+        addToDictionary(dev, bean);
     }
 
     /**
@@ -42,59 +40,55 @@ public class BRIManager {
      *
      * @param numService index of the service in the list displayed to the client
      */
-    public static void stopService(int numService) throws Exception {
+    public static void stopService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getStartedService(numService);
-        if (!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.stopService(bean);
     }
 
-    public static void startService(int numService) throws Exception {
+    public static void startService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getStoppedService(numService);
-        if (!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.startService(bean);
     }
 
-    public static void uninstallService(int numService) throws Exception {
+    public static void uninstallService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if (!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.deleteService(numService);
     }
 
-    public static void updateService(Class<?> beanUpdated, int numService) throws Exception {
+    public static void updateService(Developer dev, Class<?> beanUpdated, int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if (!isAuthorizedToPerformAction(bean))
+        if (!isAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
         ServiceManager.updateService(bean, beanUpdated, numService);
-        updateDictionary(bean, beanUpdated);
+        updateDictionary(dev, bean, beanUpdated);
     }
 
-    private static void addToDictionary(Class<?> bean) {
-        if (!classesDictionary.containsKey(userManager.getCurrentDev())) {
+    private static void addToDictionary(Developer dev, Class<?> bean) {
+        if (!classesDictionary.containsKey(dev)) {
             Vector<Class<?>> classes = new Vector<>();
             classes.add(bean);
-            classesDictionary.put(userManager.getCurrentDev(), classes);
+            classesDictionary.put(dev, classes);
         } else
-            classesDictionary.get(userManager.getCurrentDev()).add(bean);
+            classesDictionary.get(dev).add(bean);
     }
 
-    private static void updateDictionary(Class<?> bean, Class<?> beanUpdated) {
-        int beanIndex = classesDictionary.get(userManager.getCurrentDev()).indexOf(bean);
-        classesDictionary.get(userManager.getCurrentDev()).setElementAt(beanUpdated, beanIndex);
-    }
-
-    public static void login(String login, String password, String ftpUrl) throws IllegalAccessException {
-        userManager.login(login, password, ftpUrl);
+    private static void updateDictionary(Developer dev, Class<?> bean, Class<?> beanUpdated) {
+        int beanIndex = classesDictionary.get(dev).indexOf(bean);
+        classesDictionary.get(dev).setElementAt(beanUpdated, beanIndex);
     }
 
     public static String getStoppedClassesListing() {

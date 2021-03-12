@@ -2,8 +2,9 @@ package server.bri.services;
 
 import server.bri.loaders.ClassLoader;
 import server.bri.managers.BRIManager;
+import server.bri.managers.ProgServiceManager;
 import server.bri.managers.ServiceManager;
-import server.bri.managers.UserManager;
+import server.bri.managers.DeveloperManager;
 import server.model.Developer;
 import utils.NetworkData;
 
@@ -12,10 +13,13 @@ import java.net.Socket;
 public class ProgService implements Runnable {
     private static final String MSG_NO_SERVICE = "There's any service available !";
     private final NetworkData net;
-    private UserManager userManager;
+    private Developer developer;
+    private ProgServiceManager progServiceManager;
 
     public ProgService(Socket socket) {
         net = new NetworkData(socket);
+        this.developer = null;
+        this.progServiceManager = null;
         new Thread(this).start();
     }
 
@@ -30,7 +34,6 @@ public class ProgService implements Runnable {
         // login verification
         do {
             try {
-                this.userManager = UserManager.getInstance();
                 credentials = net.read().toString();
                 notConform = authenticate(credentials);
             } catch (Exception e) {
@@ -41,6 +44,8 @@ public class ProgService implements Runnable {
         } while (notConform);
 
         net.send("Welcome to the BRI manager for incredible programmers !");
+
+        this.progServiceManager = new ProgServiceManager(this.developer);
         // list all features available
         String messageToSend = """
                                 
@@ -80,7 +85,8 @@ public class ProgService implements Runnable {
         Object[] credentialsVerified = verifyCredentials(credentials);
         notConform = !(boolean) credentialsVerified[0];
         String[] credentialsSplit = (String[]) credentialsVerified[1];
-        BRIManager.login(credentialsSplit[0], credentialsSplit[1], credentialsSplit[2]);
+        this.developer = DeveloperManager
+                .login(credentialsSplit[0], credentialsSplit[1], credentialsSplit[2]);
         return notConform;
     }
 
@@ -91,13 +97,13 @@ public class ProgService implements Runnable {
 
             boolean JARType = fileType.equals(".jar");
 
-            String classURL = userManager.getCurrentDev().getFtpUrl();
+            String classURL = this.developer.getFtpUrl();
             if (JARType) {
                 net.send("Please enter the path to the JAR file ?");
                 String pathToJAR = net.read().toString();
                 classURL += pathToJAR;
             }
-            BRIManager.installService(loadService("Enter the service to load", classURL));
+            progServiceManager.installService(loadService("Enter the service to load", classURL));
             net.send("Service was added successfully");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
@@ -107,7 +113,7 @@ public class ProgService implements Runnable {
     public Class<?> loadService(String messageToDisplay, String classUrl) throws Exception {
         net.send(messageToDisplay);
         String classToLoad = net.read().toString();
-        ClassLoader serviceLoader = new ClassLoader(classUrl);
+        ClassLoader serviceLoader = new ClassLoader(this.developer, classUrl);
         return serviceLoader.loadClass(classToLoad);
     }
 
@@ -121,7 +127,7 @@ public class ProgService implements Runnable {
             net.send(message);
 
             int choice = Integer.parseInt(net.read().toString());
-            BRIManager.startService(choice);
+            progServiceManager.startService(choice);
             net.send("Service started successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
@@ -138,7 +144,7 @@ public class ProgService implements Runnable {
             net.send(message);
 
             int choice = Integer.parseInt(net.read().toString());
-            BRIManager.stopService(choice);
+            progServiceManager.stopService(choice);
             net.send("Service sopped successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
@@ -159,14 +165,14 @@ public class ProgService implements Runnable {
             String fileType = net.read().toString();
             boolean JARType = fileType.equals(".jar");
 
-            String classURL = userManager.getCurrentDev().getFtpUrl();
+            String classURL = this.developer.getFtpUrl();
             if (JARType) {
                 net.send("Please enter the path to the JAR file ?");
                 String pathToJAR = net.read().toString();
                 classURL += pathToJAR;
             }
 
-            BRIManager.updateService(loadService("Enter the path to the updated service", classURL)
+            progServiceManager.updateService(loadService("Enter the path to the updated service", classURL)
                     , choice);
             net.send("Service updated successfully ");
 
@@ -185,7 +191,7 @@ public class ProgService implements Runnable {
             net.send(message);
 
             int choice = Integer.parseInt(net.read().toString());
-            BRIManager.uninstallService(choice);
+            progServiceManager.uninstallService(choice);
             net.send("Service uninstalled successfully ");
         } catch (Exception e) {
             net.send("Error -> " + e.getMessage());
@@ -194,14 +200,13 @@ public class ProgService implements Runnable {
 
     public void modifyServerUrl() {
         try {
-            Developer dev = UserManager.getInstance().getCurrentDev();
-            if (dev == null)
+            if (this.developer == null)
                 throw new IllegalStateException("You can't do this action because you are not logged");
             net.send("Enter you new ftp url server");
             String newUrl = net.read().toString();
             if (newUrl.isBlank())
                 throw new IllegalAccessException("Please enter a valid url");
-            dev.setFtpUrl(newUrl);
+            this.developer.setFtpUrl(newUrl);
 
         } catch (Exception e) {
             e.printStackTrace();

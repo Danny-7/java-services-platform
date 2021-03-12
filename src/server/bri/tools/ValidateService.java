@@ -1,6 +1,6 @@
 package server.bri.tools;
 
-import server.bri.managers.UserManager;
+import server.model.Developer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -9,20 +9,22 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 public class ValidateService {
+    private final Developer dev;
 
-    private ValidateService() {
+    public ValidateService(Developer dev) {
+        this.dev = dev;
     }
 
-    public static boolean isConform(Class<?> service) throws Exception {
+    public boolean isConform(Class<?> service) throws Exception {
         Class<?> superclass = service.getSuperclass();
         Constructor<?>[] constructorsMetadata = service.getConstructors();
         Field[] fields = service.getDeclaredFields();
         Method[] methods = service.getMethods();
         int modifiers = service.getModifiers();
 
-        String userLogin = UserManager.getInstance().getCurrentDev().getLogin();
+        String userLogin = dev.getLogin();
         boolean isRightPackageName = service.getPackageName()
-                .equals(UserManager.getInstance().getCurrentDev().getLogin());
+                .equals(this.dev.getLogin());
 
         if (!isRightPackageName)
             throw new Exception("Your class must be on the " + userLogin + " package");
