@@ -6,7 +6,7 @@ import server.bri.services.ProgService;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-public class Server implements Runnable {
+public class Server implements Runnable, AutoCloseable {
     private ServerSocket sSocket;
     private int port;
 
@@ -22,7 +22,8 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        boolean running = true;
+        while (running) {
             try {
                 switch (port) {
                     case 4000 -> new ProgService(sSocket.accept());
@@ -30,8 +31,16 @@ public class Server implements Runnable {
                     default -> throw new IOException("This port doesn't exist");
                 }
             } catch (IOException e) {
+                System.err.println("[Server] " + e.getMessage());
                 e.printStackTrace();
+                running = false;
             }
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if(!sSocket.isClosed())
+            sSocket.close();
     }
 }

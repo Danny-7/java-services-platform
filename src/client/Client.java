@@ -16,8 +16,6 @@ public class Client {
             NetworkData net = new NetworkData(socket);
             Scanner sc = new Scanner(System.in);
 
-            System.out.format("You are connected on port %d at %s\n", port, HOST);
-
             new ServerListener(net.getIn());
             String answer;
             while (true) {
@@ -25,7 +23,7 @@ public class Client {
                 net.send(answer);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("We can't reach the server");
         }
     }
 }

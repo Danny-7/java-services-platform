@@ -10,14 +10,19 @@ import utils.NetworkData;
 
 import java.net.Socket;
 
-public class ProgService implements Runnable {
-    private static final String MSG_NO_SERVICE = "There's any service available !";
+/**
+ * Service for developers who want to install, uninstall, update, start, stop services own
+ */
+public class ProgService implements Runnable, AutoCloseable {
+    private static final String MSG_NO_SERVICE = "There's any available services !";
     private final NetworkData net;
     private Developer developer;
     private ProgServiceManager progServiceManager;
+    private final Socket socket;
 
     public ProgService(Socket socket) {
         net = new NetworkData(socket);
+        this.socket = socket;
         this.developer = null;
         this.progServiceManager = null;
         new Thread(this).start();
@@ -48,14 +53,14 @@ public class ProgService implements Runnable {
         this.progServiceManager = new ProgServiceManager(this.developer);
         // list all features available
         String messageToSend = """
-                                
-                You can do these following actions :
-                \t- Install a service from you ftp server [1]
-                \t- Start a service [2]
-                \t- Stop a service [3]
-                \t- Update a service [4]
-                \t- Uninstall a service [5]
-                \t- Modify url ftp server[6]""";
+                        
+        You can do these following actions :
+        \t- Install a service from you ftp server [1]
+        \t- Start a service [2]
+        \t- Stop a service [3]
+        \t- Update a service [4]
+        \t- Uninstall a service [5]
+        \t- Modify url ftp server[6]""";
 
         boolean stop;
         do {
@@ -77,7 +82,6 @@ public class ProgService implements Runnable {
             }
             System.out.println(ServiceManager.serviceListing());
         } while (!stop);
-
     }
 
     public boolean authenticate(String credentials) throws Exception {
@@ -172,13 +176,13 @@ public class ProgService implements Runnable {
                 classURL += pathToJAR;
             }
 
-            progServiceManager.updateService(loadService("Enter the path to the updated service", classURL)
-                    , choice);
+            progServiceManager
+                    .updateService(
+                            loadService("Enter the path to the updated service", classURL), choice);
             net.send("Service updated successfully ");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            net.send(e.getMessage());
+            net.send("Error -> " + e.getMessage());
         }
     }
 
@@ -209,8 +213,7 @@ public class ProgService implements Runnable {
             this.developer.setFtpUrl(newUrl);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            net.send(e.getMessage());
+            net.send("Error -> " + e.getMessage());
         }
     }
 
@@ -226,5 +229,12 @@ public class ProgService implements Runnable {
             throw new Exception("Your url have to follow this pattern -> ftp://[server url]:[port]");
 
         return new Object[]{true, credentialsSplit};
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        if(!socket.isClosed())
+            socket.close();
     }
 }

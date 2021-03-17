@@ -4,14 +4,13 @@ import server.model.Developer;
 
 import java.util.Vector;
 
+/**
+ * Utility class for authentication
+ */
 public class DeveloperManager {
-    private static Vector<Developer> developers;
+    private static final Vector<Developer> developers;
 
     static {
-        new DeveloperManager();
-    }
-
-    private DeveloperManager() {
         developers = new Vector<>();
         developers.add(new Developer("danny", "azerty", "ftp://localhost:2121/"));
         developers.add(new Developer("remy", "azerty", "ftp://localhost:2121/"));

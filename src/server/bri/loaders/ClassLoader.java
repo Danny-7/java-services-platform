@@ -8,6 +8,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Iterator;
 
+/**
+ * This class loader ables to load classes and jar files
+ */
 public class ClassLoader extends URLClassLoader {
     private final Developer dev;
 

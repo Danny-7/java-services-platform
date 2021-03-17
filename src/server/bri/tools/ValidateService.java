@@ -8,6 +8,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
+/**
+ * <p>Class for validate a service, given rules</p>
+ * <p>has to be in a package named like the developer login</p>
+ * <p>has to extend the Service abstract class given with bri_utils java archive</p>
+ * <p>has to be public and not an abstract class, contains at least 2 parameters Socket and NetworkData</p>
+ * <p>To know more read the isConform() method</p>
+ */
 public class ValidateService {
     private final Developer dev;
 
@@ -37,14 +44,14 @@ public class ValidateService {
         if (Modifier.isAbstract(modifiers) || !Modifier.isPublic(modifiers))
             throw new Exception("Your service has to be public and not abstract !");
 
-        boolean hasEmptyConformConstructor = Arrays.stream(constructorsMetadata)
+        boolean hasConformConstructor = Arrays.stream(constructorsMetadata)
                 .anyMatch(c -> c.getParameterCount() == 2 && Modifier.isPublic(c.getModifiers())
                         && Arrays.stream(c.getParameters()).anyMatch(p -> p.getType().getName().equals("java.net.Socket")
                         && Arrays.stream(c.getParameters()).anyMatch(param -> param.getType().getName().equals("utils.NetworkData")))
                         && Arrays.asList(c.getExceptionTypes()).isEmpty()
                 );
 
-        if (!hasEmptyConformConstructor)
+        if (!hasConformConstructor)
             throw new Exception("Your constructor has to be public with two parameters (Socket, NetworkData) and not throws Exception !");
 
         Field socketField = Arrays.stream(fields)

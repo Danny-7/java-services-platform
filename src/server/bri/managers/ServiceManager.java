@@ -7,6 +7,9 @@ import server.model.Developer;
 import java.util.Iterator;
 import java.util.Vector;
 
+/**
+ * Manager where we can perform actions on available classes
+ */
 public class ServiceManager {
     private static final Vector<Class<?>> startedClasses;
     private static final Vector<Class<?>> stoppedClasses;

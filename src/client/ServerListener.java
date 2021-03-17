@@ -3,6 +3,9 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+/**
+ * Server listener for catch incoming messages from server
+ */
 public class ServerListener implements Runnable {
     private final ObjectInputStream socketIn;
 
@@ -21,7 +24,6 @@ public class ServerListener implements Runnable {
                 serverMessage = socketIn.readObject().toString();
                 System.out.println(serverMessage);
             } catch (IOException | ClassNotFoundException e) {
-                System.err.println(e.getMessage());
                 isActive = false;
             }
         }

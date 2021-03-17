@@ -8,7 +8,10 @@ import utils.Service;
 
 import java.net.Socket;
 
-public class AmaService implements Runnable {
+/**
+ * Service which allows to use available services
+ */
+public class AmaService implements Runnable, AutoCloseable {
     private final NetworkData net;
     private final Socket socket;
 
@@ -22,8 +25,12 @@ public class AmaService implements Runnable {
     public void run() {
         try {
             String classes = BRIManager.getStartedClassesListing();
-            String services = "Choose a service to use :\n\t" + classes;
-            net.send(services);
+            String message;
+            if(classes.isBlank())
+                message = "There's any available services ! Try another time.";
+            else
+                message = "Choose a service to use :\n\t" + classes;
+            net.send(message);
 
             int serviceToLaunch = Integer.parseInt(net.read().toString());
 
@@ -38,7 +45,13 @@ public class AmaService implements Runnable {
             service.run();
 
         } catch (ReflectiveOperationException | RuntimeException e) {
-            net.send(e.getMessage());
+            net.send("[AmaService] " + e.getMessage());
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if(!socket.isClosed())
+            socket.close();
     }
 }

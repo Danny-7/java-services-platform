@@ -2,6 +2,9 @@ package server.bri.managers;
 
 import server.model.Developer;
 
+/**
+ * Manager assign to each developer connected
+ */
 public class ProgServiceManager {
     private final Developer dev;
 

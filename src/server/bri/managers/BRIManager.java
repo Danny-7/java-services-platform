@@ -3,31 +3,29 @@ package server.bri.managers;
 import server.bri.managers.utils.BRIUtil;
 import server.model.Developer;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Main manager of the application, contains list of classes owns by developers
+ */
 public class BRIManager {
     private static final Map<Developer, Vector<Class<?>>> classesDictionary;
 
     static {
-//        try {
-//            Class.forName("server.bri.managers.ServiceManager");
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-        classesDictionary = new HashMap<>();
+        classesDictionary = new ConcurrentHashMap<>();
     }
 
     public static boolean isNotKnownService(Class<?> bean) {
         return !ServiceManager.isAvailable(bean);
     }
 
-    private static boolean isAuthorizedToPerformAction(Developer dev, Class<?> bean) {
+    private static boolean isNotAuthorizedToPerformAction(Developer dev, Class<?> bean) {
         Vector<Class<?>> serviceVector = classesDictionary.get(dev);
         if (serviceVector == null)
-            return false;
-        return serviceVector.contains(bean);
+            return true;
+        return !serviceVector.contains(bean);
     }
 
     public static void installService(Developer dev, Class<?> bean) throws Exception {
@@ -42,7 +40,7 @@ public class BRIManager {
      */
     public static void stopService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getStartedService(numService);
-        if (!isAuthorizedToPerformAction(dev, bean))
+        if (isNotAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
@@ -51,7 +49,7 @@ public class BRIManager {
 
     public static void startService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getStoppedService(numService);
-        if (!isAuthorizedToPerformAction(dev, bean))
+        if (isNotAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
@@ -60,7 +58,7 @@ public class BRIManager {
 
     public static void uninstallService(Developer dev, int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if (!isAuthorizedToPerformAction(dev, bean))
+        if (isNotAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");
@@ -69,7 +67,7 @@ public class BRIManager {
 
     public static void updateService(Developer dev, Class<?> beanUpdated, int numService) throws Exception {
         Class<?> bean = ServiceManager.getService(numService);
-        if (!isAuthorizedToPerformAction(dev, bean))
+        if (isNotAuthorizedToPerformAction(dev, bean))
             throw new Exception("You are not allowed to perform this action !");
         if (isNotKnownService(bean))
             throw new Exception("This number doesn't exist !");

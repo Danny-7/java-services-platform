@@ -75,4 +75,10 @@ public class MailSender extends Service {
         sendMail(mail, messageSend);
         net.send("Message sent to -> " + mail);
     }
+
+    @Override
+    public void close() throws Exception {
+        if(!client.isClosed())
+            client.close();
+    }
 }
