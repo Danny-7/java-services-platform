@@ -222,7 +222,7 @@ public class ProgService implements Runnable, AutoCloseable {
         int nbArgs = 3;
 
         if (credentialsSplit.length != nbArgs)
-            throw new Exception("You have to give three arguments separated by '.'");
+            throw new Exception("You have to give three arguments separated by '&'");
         if (credentialsSplit[0].isEmpty() || credentialsSplit[1].isEmpty() || credentialsSplit[2].isEmpty())
             throw new Exception("You have to fill all fields");
         if (!credentialsSplit[2].startsWith("ftp://"))
@@ -230,7 +230,6 @@ public class ProgService implements Runnable, AutoCloseable {
 
         return new Object[]{true, credentialsSplit};
     }
-
 
     @Override
     public void close() throws Exception {
