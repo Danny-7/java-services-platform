@@ -34,4 +34,10 @@ public class DeveloperManager {
         developers.setElementAt(dev, indexDev);
         return dev;
     }
+
+    public static void logout(Developer dev) {
+        int indexDev = hasDeveloper(dev);
+         dev.setAuthenticated(false);
+         developers.setElementAt(dev, indexDev);
+    }
 }

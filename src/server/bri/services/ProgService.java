@@ -19,6 +19,7 @@ public class ProgService implements Runnable, AutoCloseable {
     private Developer developer;
     private ProgServiceManager progServiceManager;
     private final Socket socket;
+    private Thread thread;
 
     public ProgService(Socket socket) {
         net = new NetworkData(socket);
@@ -60,14 +61,17 @@ public class ProgService implements Runnable, AutoCloseable {
         \t- Stop a service [3]
         \t- Update a service [4]
         \t- Uninstall a service [5]
-        \t- Modify url ftp server[6]""";
+        \t- Modify url ftp server [6]
+        \t- Type exit for quit the service [exit]""";
 
         boolean stop;
-        do {
+        while(true) {
             net.send(messageToSend);
             String choice = net.read().toString();
 
-            stop = choice.equals("stop");
+            stop = choice.equals("exit");
+            if(stop)
+                break;
 
             int choiceInteger = Integer.parseInt(choice);
 
@@ -81,7 +85,8 @@ public class ProgService implements Runnable, AutoCloseable {
                 default -> net.send("This choice doesn't exist");
             }
             System.out.println(ServiceManager.serviceListing());
-        } while (!stop);
+        }
+        DeveloperManager.logout(this.developer);
     }
 
     public boolean authenticate(String credentials) throws Exception {
